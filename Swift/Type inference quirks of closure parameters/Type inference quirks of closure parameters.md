@@ -16,7 +16,7 @@ let reversed = sorted(names) { s1, s2 in
 }
 ```
 
-Because single-expression closures can implicityly return the value of the expression, the code above can be shortened to:
+Because single-expression closures can implicitly return the value of the expression, the code above can be shortened to:
 
 ```Swift
 let reversed = sorted(names) { s1, s2 in
