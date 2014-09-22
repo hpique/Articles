@@ -30,7 +30,7 @@ Or even more succintly by using shorthand argument names:
 let reversed = sorted(names) { $0 > $1 }
 ```
 
-So far so good. However, the documentation leaves out some cases in which Swift fails to infer the closure type properly (as of Xcode 6.0). During the development of [Haneke](https://github.com/Haneke/HanekeSwift) the two below. You can follow along the code examples with [this playground](https://github.com/hpique/Articles/tree/master/Swift/Type%20inference%20quirks%20of%20closure%20parameters/Type%20inference%20quirks%20of%20closure%20parameters.playground).
+So far so good. However, the documentation leaves out some cases in which Swift fails to infer the closure type properly (as of Xcode 6.0). During the development of [Haneke](https://github.com/Haneke/HanekeSwift) we discovered the two below. You can follow along the code examples with [this playground](https://github.com/hpique/Articles/tree/master/Swift/Type%20inference%20quirks%20of%20closure%20parameters/Type%20inference%20quirks%20of%20closure%20parameters.playground).
 
 ## Quirk 1: Single-expression closures with unused return value
 
