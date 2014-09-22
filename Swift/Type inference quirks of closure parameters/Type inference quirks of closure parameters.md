@@ -34,7 +34,7 @@ So far so good. However, the documentation leaves out some cases in which Swift 
 
 ## Quirk 1: Single-expression closures with unused return value
 
-The first involves single-expression closures. Say we want to se the modification date of a file in background, without much care of errors. Intuitively, we would write something like this:
+The first involves single-expression closures. Say we want to set the modification date of a file in background, without much care for errors. Intuitively, we would write something like this:
 
 ```Swift
 dispatch_async(someBackgroundQueue) {
@@ -44,7 +44,7 @@ dispatch_async(someBackgroundQueue) {
 
 Unfortunately the above code fails to compile with error `Cannot convert the expression's type '(dispatch_queue_t!, () -> () -> $T5)' to type 'Bool'`.
 
-The reason is that `NSFileManager.setAttributes` returns a Bool and because the closure has a single-expression, the Swift compiler mistakenly infers that its return type is a Bool. 
+The reason is that `NSFileManager.setAttributes` returns a `Bool`, and because the closure has a single-expression, the Swift compiler mistakenly infers that its return type is `Bool`. 
 
 The workaround? We guide the Swift compiler by ignoring the result value with an underscore:
 
