@@ -3,7 +3,8 @@
 Methods with success and failure block parameters are fairly common in Objective-C. Take this method from [Haneke for Objective-C](https://github.com/Haneke/Haneke/) as an example:
 
 ```objective-c
-- (void)fetchImageWithSuccess:(void (^)(UIImage *image))successBlock failure:(void (^)(NSError *error))failureBlock;
+- (void)fetchImageWithSuccess:(void (^)(UIImage *image))successBlock 
+                      failure:(void (^)(NSError *error))failureBlock;
 ```
 
 A literal translation of the above signature in Swift would be:
@@ -18,7 +19,7 @@ In Swift blocks are closures and methods are functions, and the latter offer fea
 func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (UIImage -> ())? = nil) {}
 ```
 
-Let's examine the changes one by one and finish with a style guide. You can follow along the code examples with this [playground](https://github.com/hpique/Articles/tree/master/Swift/Style%20guide%20for%20functions%20with%20closure%20parameters/Style%20guide%20for%20functions%20with%20closure%20parameters.playground).
+Let's examine the changes one by one and finish with a [style guide](#style-guide). You can follow along the code examples with this [playground](https://github.com/hpique/Articles/tree/master/Swift/Style%20guide%20for%20functions%20with%20closure%20parameters/Style%20guide%20for%20functions%20with%20closure%20parameters.playground).
 
 ## Parameter order
 
