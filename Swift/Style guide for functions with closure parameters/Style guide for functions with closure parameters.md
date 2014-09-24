@@ -16,7 +16,7 @@ func fetchImageWithSuccess(successBlock : (UIImage! -> ())!, failure failureBloc
 In Swift blocks are closures and methods are functions, and the latter offer features such as default values and trailing closures. This article is an attempt to leverage these new features to improve clarity and simplify usage of functions with closures. Here's how we could improve the previous translation:
 
 ```swift
-func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (UIImage -> ())? = nil) {}
+func fetchImage(failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {}
 ```
 
 Let's examine the changes one by one and finish with a [style guide](#style-guide). You can follow along the code examples with this [playground](https://github.com/hpique/Articles/tree/master/Swift/Style%20guide%20for%20functions%20with%20closure%20parameters/Style%20guide%20for%20functions%20with%20closure%20parameters.playground).
@@ -88,7 +88,7 @@ fetchImage()
 Empty closures are the most intuitive default value for a closure parameter. The function signature would look like this:
 
 ```swift
-func fetchImage(success doSuccess: UIImage -> () = { image in }, failure doFailure : NSError -> () = {error in })
+func fetchImage(success succeed: UIImage -> () = { image in }, failure fail : NSError -> () = {error in })
 ```
 
 The work of the function developer couldn't be easier. If the function user doesn't specify a closure, then we do nothing by calling a closure that does nothing. The function implementation is the same no matter if the function user provides values or not.
@@ -96,14 +96,14 @@ The work of the function developer couldn't be easier. If the function user does
 Yet, there are some cases in which this might not be desirable. Consider this implementation for `fetchImage`.
 
 ```swift
-func fetchImage(success doSuccess: UIImage -> () = { image in }, failure doFailure : NSError -> () = {error in }) {
+func fetchImage(success succeed: UIImage -> () = { image in }, failure fail : NSError -> () = {error in }) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
         let didSucceed = self.expensiveWorkWithoutSideEffects()
         dispatch_async(dispatch_get_main_queue()) {
             if didSucceed {
-                doSuccess(UIImage())
+                succeed(UIImage())
             } else {
-                doFailure(NSError())
+                fail(NSError())
             }
         }
     }
@@ -119,7 +119,7 @@ If avoiding this matters then we must use `nil` as a default instead.
 Using `nil` as default value looks like this:
 
 ```swift
-func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (UIImage -> ())? = nil)
+func fetchImage(failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil)
 ```
 
 In this case the work of the function developer is slightly more complicated and error prone. The closures are now optional, so she must check if they have a value before calling them. 
@@ -127,19 +127,19 @@ In this case the work of the function developer is slightly more complicated and
 Returning to our previous example, this is how the implementation would look like if we wanted the function to do as litte work as possible.
 
 ```swift
-func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (UIImage -> ())? = nil) {
-    if doFailure == nil && doSuccess == nil { return }
+func fetchImage(failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {
+    if fail == nil && succeed == nil { return }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
         let didSucceed = self.expensiveWorkWithoutSideEffects()
         if didSucceed {
-            if let doSuccess = doSuccess {
+            if let succeed = succeed {
                 dispatch_async(dispatch_get_main_queue()) {
-                    doSuccess(UIImage())
+                    succeed(UIImage())
                 }
             }
-        } else if let doFailure = doFailure {
+        } else if let fail = fail {
             dispatch_async(dispatch_get_main_queue()) {
-                doFailure(NSError())
+                fail(NSError())
             }
         }
     }
@@ -172,24 +172,25 @@ The final and perhaps most subjective difference are the parameters names.
 
 Typically, block parameters in Objective-C are called `somethingBlock`. In Swift we could use `somethingClosure`, but that would make the parameter name even longer. Loosing the qualifier is not an option, as it makes the parameter type less clear (e.g., Is `success` a closure or a `Bool`? Does  `failure` represent a reason or a closure?)
 
-For lack of an official style guide, I propose prefixing internal parameter names of closures with `do`. Let's take an excerpt from previous examples and see if this feels right.
+For lack of an official style guide, I propose using verbs for internal parameter names of closures (as suggested by Legolas-the-elf). If not possible to find a verb, prefixing the name with `on` should do (as suggested by @radex). Let's take an excerpt from previous examples and see if this feels right.
 
 ```
 if didSucceed {
-    doSuccess(image)
+    succeed(image) // onSuccess(image)
 } else {
-    doFailure(error)
+    fail(error) // onfailure(error)
 }
 ```
 
-At the very least the `do` prefix is short and clearly indicates a closure. While it might not become the standard, it beats calling these parameters `somethingBlock`.
+At the very least the `on` prefix is short and clearly indicates a closure. While it might not become the standard, it beats calling these parameters `somethingBlock`.
+
 
 ## Style guide
 
 * In functions with more than one closure, treat the trailing closure as the most important closure of the function.
 * Set the default value of closure parameters to an empty closure or `nil`. `nil` is preferred when performance is a concern and optimizations can be implemented by knowning that the function user didn't provide a closure.
 * Avoid suffixing the method name with the first parameter name when said parameter is a closure (e.g., `fetchImageWithFailure`).
-* Prefix internal closure parameter names with `do`.
+* User verbs for internal closure parameter names or prefix them with `on`.
 
 Agree? Disagree? Please don't hesitate to post an issue or submit pull requests with feedback or corrections.
 

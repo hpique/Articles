@@ -6,7 +6,7 @@ import UIKit
 func fetchImageWithSuccess(successBlock : (UIImage! -> ())!, failure failureBlock : (NSError! -> ())!) {}
 
 // Better clarity and usability
-func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (UIImage -> ())? = nil) {
+func fetchImage(failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {
     print("Hello")
 }
 
@@ -14,7 +14,7 @@ func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (
 
 class SuccessFirst {
 
-    func fetchImage(success doSuccess: (UIImage -> ())? = nil, failure doFailure : (NSError -> ())? = nil) {}
+    func fetchImage(success succeed: (UIImage -> ())? = nil, failure fail : (NSError -> ())? = nil) {}
     
 }
 
@@ -54,14 +54,14 @@ fetchImage()
 
 class EmptyClosureDefault {
     
-func fetchImage(success doSuccess: UIImage -> () = { image in }, failure doFailure : NSError -> () = {error in }) {
+func fetchImage(success succeed: UIImage -> () = { image in }, failure fail : NSError -> () = {error in }) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
         let didSucceed = self.expensiveWorkWithoutSideEffects()
         dispatch_async(dispatch_get_main_queue()) {
             if didSucceed {
-                doSuccess(UIImage())
+                succeed(UIImage())
             } else {
-                doFailure(NSError())
+                fail(NSError())
             }
         }
     }
@@ -73,19 +73,19 @@ func fetchImage(success doSuccess: UIImage -> () = { image in }, failure doFailu
 
 class NilClosureDefault {
     
-func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (UIImage -> ())? = nil) {
-    if doFailure == nil && doSuccess == nil { return }
+func fetchImage(failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {
+    if fail == nil && succeed == nil { return }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
         let didSucceed = self.expensiveWorkWithoutSideEffects()
         if didSucceed {
-            if let doSuccess = doSuccess {
+            if let succeed = succeed {
                 dispatch_async(dispatch_get_main_queue()) {
-                    doSuccess(UIImage())
+                    succeed(UIImage())
                 }
             }
-        } else if let doFailure = doFailure {
+        } else if let fail = fail {
             dispatch_async(dispatch_get_main_queue()) {
-                doFailure(NSError())
+                fail(NSError())
             }
         }
     }
@@ -98,7 +98,7 @@ func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (
 // MARK: Function name
 
 class LegacyNaming {
-    func fetchImageWithFailure(failure doFailure : (NSError -> ())? = nil, success doSuccess: (UIImage -> ())? = nil) {
+    func fetchImageWithFailure(failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {
         print("Legacy naming")
     }
 }
