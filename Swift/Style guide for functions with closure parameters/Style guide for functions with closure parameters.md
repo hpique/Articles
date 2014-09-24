@@ -18,7 +18,7 @@ In Swift blocks are closures and methods are functions, and the latter offer fea
 func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (UIImage -> ())? = nil) {}
 ```
 
-Let's examine the changes one by one and finish with a style guide.
+Let's examine the changes one by one and finish with a style guide. You can follow along the code examples with this [playground](https://github.com/hpique/Articles/tree/master/Swift/Style%20guide%20for%20functions%20with%20closure%20parameters/Style%20guide%20for%20functions%20with%20closure%20parameters.playground).
 
 ## Parameter order
 
@@ -38,7 +38,7 @@ fetchImage(success: { image in
 
 Trailing closures have no associated semantics. Yet, one could expect developers to pay special attention to trailing closures, perhaps as a side effect of using them with functions such as `map` or `sort`. I would go so far to say that the _trailing closure is the main closure of a function_. If so, do we want developers to be focusing on the failure closure?
 
-Let's look at how it looks if we put the success closure last.
+Let's look at how our function could be called if we put the success closure last.
 
 ```swift
 fetchImage(failure: { error in
@@ -48,7 +48,7 @@ fetchImage(failure: { error in
 }
 ```
 
-Wether the above call is better than the previous might be up to personal taste. However, if we get slightly ahead and use the default failure value, it becomes clear why the success closure should be last.
+Wether the above call is better than the previous is up to personal taste. However, if we get slightly ahead and use the default failure value, it becomes clear why the success closure should be last.
 
 ```swift
 fetchImage { image in
@@ -61,7 +61,7 @@ This call is undisputedly short and clear. The only way to be able to use the fu
 
 ## Default values
 
-Providing a success and failure closure is verbose, and not always required by the function user. She might only care about the success case. When writing unit tests, the success case might be ignored altogether. Or neither closure might be needed if the function has side-effect or returns a value.
+Providing a success and failure closure is verbose, and not always required by the function user. She might only care about the success case. When writing unit tests, the success case might be ignored altogether. Or neither closure might be needed if the function has side-effects or returns a value.
 
 In Objective-C we could always set the block parameter to `nil`. In Swift, we might be able to do it or not depending on if the closure parameter has been marked as optional. A better approach is to _always provide a default value for closure parameters_.
 
@@ -121,7 +121,7 @@ Using `nil` as default value looks like this:
 func fetchImage(failure doFailure : (NSError -> ())? = nil, success doSuccess: (UIImage -> ())? = nil)
 ```
 
-In this case the work of the function developer is slightly more complicated and error-prone. The closures are now optional, so she must check if they have a value before calling them. 
+In this case the work of the function developer is slightly more complicated and error prone. The closures are now optional, so she must check if they have a value before calling them. 
 
 Returning to our previous example, this is how the implementation would look like if we wanted the function to do as litte work as possible.
 
@@ -149,12 +149,11 @@ This implementation does nothing if both closures are `nil`. It also avoids the 
 
 _When performance is a concern, better to use `nil` as a default value._
 
-
 ## Method name
 
 In Objective-C the method name acts as the external name of the first parameter because said first parameter doesn't have an external name. This is why the Objective-C version of our function is called `fetchImageWithSuccess`.
 
-_There's no reason to mantain this style in Swift_ other than compatibility with Objective-C. In fact,  doing so would decrease clarity if we apply the previous two improvements. See for yourself: 
+_There's no reason to mantain this style in Swift_ other than compatibility with Objective-C. In fact, doing so would decrease clarity if we apply the previous two recommendations. See for yourself: 
 
 ```swift
 fetchImageWithFailure(success: { image in
@@ -166,14 +165,13 @@ fetchImageWithFailure { image in
 }
 ```
 
-
 ## Parameter names
 
 The final and perhaps most subjective difference are the parameters names. 
 
-Typically, block parameters in Objective-C are called `somethingBlock`. In Swift we could use `somethingClosure`, but that would make the parameter name even longer. Loosing the qualifier is not an option, as it makes the parameter type less clear (e.g., Is `success` a closure or a `Bool`? Does  `failure` represent reason or a closure?)
+Typically, block parameters in Objective-C are called `somethingBlock`. In Swift we could use `somethingClosure`, but that would make the parameter name even longer. Loosing the qualifier is not an option, as it makes the parameter type less clear (e.g., Is `success` a closure or a `Bool`? Does  `failure` represent a reason or a closure?)
 
-For lack of an official style guide, I propose prefixing internal parameter names of closures with `do`. Let's take an excerpt from previous examples and see if it feels right.
+For lack of an official style guide, I propose prefixing internal parameter names of closures with `do`. Let's take an excerpt from previous examples and see if this feels right.
 
 ```
 if didSucceed {
@@ -183,7 +181,7 @@ if didSucceed {
 }
 ```
 
-At the very least the `do` prefix is short and clearly indicates a closure. While might not become the standars, it beats calling these parameters `somethingBlock`.
+At the very least the `do` prefix is short and clearly indicates a closure. While it might not become the standard, it beats calling these parameters `somethingBlock`.
 
 ## Style guide
 
