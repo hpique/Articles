@@ -91,11 +91,10 @@ However, as of Xcode 6.1 Beta 2, the above code fails to compile with the rather
 A workaround is to explictly add the other closure.
 
 ```swift
-example2.fetchImage(failure:nil) { image in
+fetchImage(failure:nil) { image in
     // Success
 }
 ```
-
 
 ## Default values
 
@@ -246,6 +245,8 @@ func fetchImage() -> Fetch<UIImage>
 ```
 
 Where `Fetch` is a generic class that can accept the success and failure closures and call them accordingly. Its implementation will depend on the specific requirements of the operation (e.g., is `fetchImage` fully asynchronous or can it finish synchronously in some scenarios?) and as such is left out of the scope of this article.
+
+It's worth noting that this was also possible in Objective-C. However, thanks to generics and a refined closure syntax, the Swift code is much easier to read and write.
 
 ## Style guide
 
