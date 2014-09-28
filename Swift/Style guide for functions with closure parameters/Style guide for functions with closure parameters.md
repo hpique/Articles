@@ -75,7 +75,9 @@ This call is undisputedly short and clear. The only way to be able to use the fu
 There are some compiler limitations for trailing closures in functions with additional parameters. To illustrate, let's add one parameter to the `fetch` function:
 
 ```swift
-func fetchImage(retry : Bool = true, failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {}
+func fetchImage(retry : Bool = true, 
+                failure fail : (NSError -> ())? = nil, 
+                success succeed: (UIImage -> ())? = nil) {}
 ```
 
 Given that all parameters have default values, one would expect the following to be valid Swift.
@@ -88,7 +90,7 @@ fetchImage { image in
 
 However, as of Xcode 6.1 Beta 2, the above code fails to compile with the rather unhelpful error: `cannot convert the expression's type '(($T3) -> ($T3) -> $T2) -> (($T3) -> $T2) -> $T2' to type '(retry: Bool, failure: (NSError -> ())?, success: (UIImage -> ())?) -> ()'`.
 
-A workaround is to explictly add the other closure.
+A workaround is to explictly add the other closure to the invocation:
 
 ```swift
 fetchImage(failure:nil) { image in
@@ -124,7 +126,8 @@ fetchImage()
 Empty closures are the most intuitive default value for a closure parameter. The function signature would look like this:
 
 ```swift
-func fetchImage(success succeed: UIImage -> () = { image in }, failure fail : NSError -> () = {error in })
+func fetchImage(success succeed: UIImage -> () = { image in }, 
+                failure fail : NSError -> () = {error in })
 ```
 
 The work of the function developer couldn't be easier. If the function user doesn't specify a closure, then we do nothing by calling a closure that does nothing. The function implementation is the same no matter if the function user provides values or not.
@@ -246,7 +249,7 @@ func fetchImage() -> Fetch<UIImage>
 
 Where `Fetch` is a generic class that can accept the success and failure closures and call them accordingly. Its implementation will depend on the specific requirements of the operation (e.g., is `fetchImage` fully asynchronous or can it finish synchronously in some scenarios?) and as such is left out of the scope of this article.
 
-It's worth noting that this was also possible in Objective-C. However, thanks to generics and a refined closure syntax, the Swift code is much easier to read and write.
+It's worth noting that method chaining was also possible in Objective-C. However, thanks to generics and a refined closure syntax, the Swift code is much easier to read and write.
 
 ## Style guide
 
