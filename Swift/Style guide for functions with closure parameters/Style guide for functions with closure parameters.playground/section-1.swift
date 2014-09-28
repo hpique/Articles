@@ -7,7 +7,7 @@ func fetchImageWithSuccess(successBlock : (UIImage! -> ())!, failure failureBloc
 
 // Better clarity and usability
 func fetchImage(failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {
-    print("Hello")
+    println("Hello")
 }
 
 // MARK: Parameter order
@@ -18,11 +18,19 @@ class SuccessFirst {
     
 }
 
+let example1 = SuccessFirst()
+
 // Success first
-SuccessFirst().fetchImage(success: { image in
+example1.fetchImage(success: { image in
     // Success
 }) { error in
     // Failure
+}
+
+// Success first, default success.
+example1.fetchImage { _ in
+    // Is this success or failure?
+    // If we declared the success closure first, this is the failure closure!
 }
 
 // Failure first
@@ -34,6 +42,28 @@ fetchImage(failure: { error in
 
 // Failure first, default failure
 fetchImage { image in
+    // Success
+}
+
+// When using extra parameters trailing closures doesn't work as expected.
+// This appears to be a Swift compiler bug.
+
+class SuccessLastWithExtraParameter {
+    
+    func fetchImage(retry : Bool = true, failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {
+        println("Extra paramater")
+    }
+    
+}
+
+let example2 = SuccessLastWithExtraParameter()
+
+// Doesn't compile! Swift bug?
+/* example2.fetchImage { image in
+    // Success
+} */
+
+example2.fetchImage(failure:nil) { image in
     // Success
 }
 
@@ -99,15 +129,53 @@ func fetchImage(failure fail : (NSError -> ())? = nil, success succeed: (UIImage
 
 class LegacyNaming {
     func fetchImageWithFailure(failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {
-        print("Legacy naming")
+        println("Legacy naming")
     }
 }
 
-LegacyNaming().fetchImageWithFailure(success: { image in
-    // Success?
+let example3 = LegacyNaming()
+
+example3.fetchImageWithFailure(success: { _ in
+    // Success
+    // Though you might think otherwise if you read it quickly.
 })
 
-LegacyNaming().fetchImageWithFailure { image in
-    // Success?
+example3.fetchImageWithFailure { _ in
+    // Success or failure?
+    // It's success.
+}
+
+// MARK: Method chaining
+
+class MethodChainig {
+    
+    func fetchImage() -> Fetch<UIImage> {
+        let fetch = Fetch<UIImage>()
+        return fetch
+    }
+    
+}
+
+class Fetch<T> {
+    
+    func onSuccess(succeed : T -> ()) -> Self {
+        return self
+    }
+    
+    func onFailure(fail : NSError? -> ()) -> Self {
+        return self
+    }
+}
+
+let example4 = MethodChainig()
+
+example4.fetchImage().onSuccess { image in
+    // Success
+}
+
+example4.fetchImage().onFailure { error in
+    // Failure
+}.onSuccess { image in
+    // Success
 }
 

@@ -10,16 +10,18 @@ Methods with success and failure block parameters are fairly common in Objective
 A literal translation of the above signature in Swift would be:
 
 ```swift
-func fetchImageWithSuccess(successBlock : (UIImage! -> ())!, failure failureBlock : (NSError! -> ())!)
+func fetchImageWithSuccess(successBlock : (UIImage! -> ())!, 
+                           failure failureBlock : (NSError! -> ())!)
 ```
 
 In Swift blocks are closures and methods are functions, and the latter offer features such as default values and trailing closures. This article is an attempt to leverage these new features to improve clarity and simplify usage of functions with closures. Here's how we could improve the previous translation:
 
 ```swift
-func fetchImage(failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {}
+func fetchImage(failure fail : (NSError -> ())? = nil, 
+                success succeed: (UIImage -> ())? = nil) {}
 ```
 
-Let's examine the changes one by one and finish with a [style guide](#style-guide). You can follow along the code examples with this [playground](https://github.com/hpique/Articles/tree/master/Swift/Style%20guide%20for%20functions%20with%20closure%20parameters/Style%20guide%20for%20functions%20with%20closure%20parameters.playground).
+Let's examine the changes one by one and finish with a [style guide](#style-guide). I highly recommend following along with this [playground](https://github.com/hpique/Articles/tree/master/Swift/Style%20guide%20for%20functions%20with%20closure%20parameters/Style%20guide%20for%20functions%20with%20closure%20parameters.playground).
 
 ## Parameter order
 
@@ -34,6 +36,15 @@ fetchImage(success: { image in
     // Success
 }) { error in
     // Failure
+}
+```
+
+If the success closure has a default value, we can even write misleading code like:
+
+```swift
+fetchImage { _ in
+    // Is this success or failure? 
+    // If we declared the success closure first, this is the failure closure!
 }
 ```
 
@@ -58,6 +69,32 @@ fetchImage { image in
 ```
 
 This call is undisputedly short and clear. The only way to be able to use the function like this is to let the success closure be the trailing closure. 
+
+### Swift compiler limitations
+
+There are some compiler limitations for trailing closures in functions with additional parameters. To illustrate, let's add one parameter to the `fetch` function:
+
+```swift
+func fetchImage(retry : Bool = true, failure fail : (NSError -> ())? = nil, success succeed: (UIImage -> ())? = nil) {}
+```
+
+Given that all parameters have default values, one would expect the following to be valid Swift.
+
+```swift
+fetchImage { image in
+    // Success
+}
+```
+
+However, as of Xcode 6.1 Beta 2, the above code fails to compile with the rather unhelpful error: `cannot convert the expression's type '(($T3) -> ($T3) -> $T2) -> (($T3) -> $T2) -> $T2' to type '(retry: Bool, failure: (NSError -> ())?, success: (UIImage -> ())?) -> ()'`.
+
+A workaround is to explictly add the other closure.
+
+```swift
+example2.fetchImage(failure:nil) { image in
+    // Success
+}
+```
 
 
 ## Default values
@@ -158,11 +195,13 @@ _There's no reason to mantain this style in Swift_ other than compatibility with
 
 ```swift
 fetchImageWithFailure(success: { image in
-    // Success?
+    // Success
+    // Though you might think otherwise if you read it quickly.
 })
 
-fetchImageWithFailure { image in
-    // Success?
+fetchImageWithFailure { _ in
+    // Success or failure?
+    // It's success, but you have to know the function signature to know.
 }
 ```
 
@@ -184,6 +223,29 @@ if didSucceed {
 
 At the very least the `on` prefix is short and clearly indicates a closure. While it might not become the standard, it beats calling these parameters `somethingBlock`.
 
+## Method chaining as an alternative to multiple closure parameters
+
+As shown in the previous examples multiple closure parameters can be misleading if not treated with care. One could avoid them altogether by using other techniques such as delegates or method chaining. In particularly, the latter works great in Swift:
+
+```swift
+fetchImage().onSuccess { image in
+	// Success
+}
+
+fetchImage().onFailure { error in
+	// Failure
+}.onSuccess { image in
+	// Success
+}
+```
+
+For this we would need a completely different signature:
+
+```swift
+func fetchImage() -> Fetch<UIImage>
+```
+
+Where `Fetch` is a generic class that can accept the success and failure closures and call them accordingly. Its implementation will depend on the specific requirements of the operation (e.g., is `fetchImage` fully asynchronous or can it finish synchronously in some scenarios?) and as such is left out of the scope of this article.
 
 ## Style guide
 
@@ -191,6 +253,7 @@ At the very least the `on` prefix is short and clearly indicates a closure. Whil
 * Set the default value of closure parameters to an empty closure or `nil`. `nil` is preferred when performance is a concern and optimizations can be implemented by knowning that the function user didn't provide a closure.
 * Avoid suffixing the method name with the first parameter name when said parameter is a closure (e.g., `fetchImageWithFailure`).
 * User verbs for internal closure parameter names or prefix them with `on`.
+* Consider method chaining as an alternative for multiple closure parameters.
 
 Agree? Disagree? Please don't hesitate to post an issue or submit pull requests with feedback or corrections.
 
