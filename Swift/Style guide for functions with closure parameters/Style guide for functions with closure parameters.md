@@ -256,7 +256,7 @@ It's worth noting that method chaining was also possible in Objective-C. However
 * In functions with more than one closure, treat the trailing closure as the most important closure of the function.
 * Set the default value of closure parameters to an empty closure or `nil`. `nil` is preferred when performance is a concern and optimizations can be implemented by knowning that the function user didn't provide a closure.
 * Avoid suffixing the method name with the first parameter name when said parameter is a closure (e.g., `fetchImageWithFailure`).
-* User verbs for internal closure parameter names or prefix them with `on`.
+* Use verbs for internal closure parameter names or prefix them with `on`.
 * Consider method chaining as an alternative for multiple closure parameters.
 
 Agree? Disagree? Please don't hesitate to post an issue or submit pull requests with feedback or corrections.
