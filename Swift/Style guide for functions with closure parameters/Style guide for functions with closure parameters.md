@@ -88,16 +88,6 @@ fetchImage { image in
 }
 ```
 
-However, as of Xcode 6.1 Beta 2, the above code fails to compile with the rather unhelpful error: `cannot convert the expression's type '(($T3) -> ($T3) -> $T2) -> (($T3) -> $T2) -> $T2' to type '(retry: Bool, failure: (NSError -> ())?, success: (UIImage -> ())?) -> ()'`.
-
-A workaround is to explictly add the other closure to the invocation:
-
-```swift
-fetchImage(failure:nil) { image in
-    // Success
-}
-```
-
 ## Default values
 
 Providing a success and failure closure is verbose, and not always required by the function user. She might only care about the success case. When writing unit tests, the success case might be ignored altogether. Or neither closure might be needed if the function has side-effects or returns a value.
